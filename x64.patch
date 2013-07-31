@@ -1,0 +1,98 @@
+=== modified file 'configure.ac' (properties changed: -x to +x)
+--- old/configure.ac	2013-07-27 01:18:21 +0000
++++ new/configure.ac	2013-07-31 08:43:55 +0000
+@@ -1126,7 +1126,7 @@
+ ## additional optimization.  --nils@exp-math.uni-essen.de
+ test "$opsys" = "aix4.2" && test "x$GCC" != "xyes" && \
+   C_SWITCH_SYSTEM="-ma -qmaxmem=4000"
+-test "$opsys" = "mingw32" && C_SWITCH_SYSTEM="-mtune=pentium4"
++#test "$opsys" = "mingw32" && C_SWITCH_SYSTEM="-mtune=pentium4"
+ ## gnu-linux might need -D_BSD_SOURCE on old libc5 systems.
+ ## It is redundant in glibc2, since we define _GNU_SOURCE.
+ AC_SUBST(C_SWITCH_SYSTEM)
+@@ -4647,7 +4647,7 @@
+    ## to make the entry points the same by changing unexw32.c.
+    case "$canonical" in
+      x86_64-*-*) LD_SWITCH_SYSTEM_TEMACS="-Wl,-stack,0x00800000 -Wl,-heap,0x00100000 -Wl,-image-base,0x01000000 -Wl,-entry,_start -Wl,-Map,./temacs.map" ;;
+-     *) LD_SWITCH_SYSTEM_TEMACS="-Wl,-stack,0x00800000 -Wl,-heap,0x00100000 -Wl,-image-base,0x01000000 -Wl,-entry,__start -Wl,-Map,./temacs.map" ;;
++     *) LD_SWITCH_SYSTEM_TEMACS="-Wl,-stack,0x00800000 -Wl,-heap,0x00100000 -Wl,-image-base,0x01000000 -Wl,-entry,_start -Wl,-Map,./temacs.map" ;;
+    esac
+    ;;
+ 
+
+=== modified file 'lib-src/ntlib.c' (properties changed: -x to +x)
+--- old/lib-src/ntlib.c	2013-03-31 14:04:49 +0000
++++ new/lib-src/ntlib.c	2013-07-31 08:43:55 +0000
+@@ -224,7 +224,7 @@
+ /* This is needed because lib/gettime.c calls gettimeofday, which MSVC
+    doesn't have.  Copied from w32.c.  */
+ void
+-gettimeofday (struct timeval *tv, struct timezone *tz)
++gettimeofdaygg (struct timeval *tv, struct timezone *tz)
+ {
+   struct _timeb tb;
+   _ftime (&tb);
+
+=== modified file 'nt/inc/sys/time.h' (properties changed: -x to +x)
+--- old/nt/inc/sys/time.h	2013-06-03 17:15:44 +0000
++++ new/nt/inc/sys/time.h	2013-07-31 08:43:55 +0000
+@@ -14,8 +14,8 @@
+ #define _TIMEVAL_DEFINED
+ struct timeval
+ {
+-  long		tv_sec;		/* seconds */
+-  long		tv_usec;	/* microseconds */
++  unsigned long long	tv_sec;		/* seconds */
++  long int long		tv_usec;	/* microseconds */
+ };
+ #define timerisset(tvp)  ((tvp)->tv_sec || (tvp)->tv_usec)
+ #define timercmp(tvp, uvp, cmp) \
+
+=== modified file 'src/image.c'
+--- old/src/image.c	2013-07-20 19:20:33 +0000
++++ new/src/image.c	2013-07-31 09:12:26 +0000
+@@ -5599,7 +5599,7 @@
+    substitute may munge the signal mask, but that should be OK here.
+    MinGW (MS-Windows) uses _setjmp and defines setjmp to _setjmp in
+    the system header setjmp.h; don't mess up that.  */
+-#ifndef HAVE__SETJMP
++#if 0 //#ifndef HAVE__SETJMP
+ # define _setjmp(j) setjmp (j)
+ # define _longjmp longjmp
+ #endif
+@@ -5797,7 +5797,7 @@
+ 
+   /* Set error jump-back.  We come back here when the PNG library
+      detects an error.  */
+-  if (_setjmp (PNG_JMPBUF (png_ptr)))
++  if (sys_setjmp (PNG_JMPBUF (png_ptr)))
+     {
+     error:
+       if (c->png_ptr)
+
+=== modified file 'src/w32heap.c' (properties changed: -x to +x)
+--- old/src/w32heap.c	2013-01-22 13:30:17 +0000
++++ new/src/w32heap.c	2013-07-31 08:43:55 +0000
+@@ -96,7 +96,7 @@
+ allocate_heap (void)
+ {
+ #ifdef _WIN64
+-  size_t size = 0x4000000000i64; /* start by asking for 32GB */
++  size_t size = 0x4000000000ull; /* start by asking for 32GB */
+ #else
+   /* We used to start with 2GB here, but on Windows 7 that would leave
+      too little room in the address space for threads started by
+
+=== modified file 'src/w32proc.c' (properties changed: -x to +x)
+--- old/src/w32proc.c	2013-02-25 17:36:03 +0000
++++ new/src/w32proc.c	2013-07-31 08:43:55 +0000
+@@ -2251,7 +2251,7 @@
+ 
+ /* Emulate 'kill', but only for other processes.  */
+ int
+-sys_kill (pid_t pid, int sig)
++sys_kill (int pid, int sig)
+ {
+   child_process *cp;
+   HANDLE proc_hand;
+
