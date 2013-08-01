@@ -13,3 +13,4 @@ cd /d/emacs-build
 #../emacs.bzr/configure --prefix=/home/yj >> /d/$logfilename 2>&1
 CPPFLAGS='-DGLYPH_DEBUG=1' CFLAGS='-O0 -g3' ../emacs.bzr/nt/msysconfig.sh --prefix=c:/emacs/emacs-bzr --without-xpm --without-jpeg --without-tiff --without-gif --without-png --enable-checking >> /d/$logfilename 2>&1
 make >> /d/$logfilename 2>&1
+make check >> /d/$logfilename 2>&1
