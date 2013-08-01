@@ -6,6 +6,8 @@
     * mingw/msys from <http://mingw.org>
 * w64
     * strawberry perl 64bit from <http://strawberryperl.com>
+    * yypkg <http://yypkg.org/mingw-builds/>
+      * has pkg-config
 
 ## Procedure
 
