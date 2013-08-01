@@ -29,6 +29,15 @@
  ## gnu-linux might need -D_BSD_SOURCE on old libc5 systems.
  ## It is redundant in glibc2, since we define _GNU_SOURCE.
  AC_SUBST(C_SWITCH_SYSTEM)
+@@ -3138,7 +3150,7 @@
+ HAVE_LIBXML2=no
+ if test "${with_xml2}" != "no"; then
+   ### I'm not sure what the version number should be, so I just guessed.
+-  PKG_CHECK_MODULES(LIBXML2, libxml-2.0 > 2.6.17, HAVE_LIBXML2=yes, HAVE_LIBXML2=no)
++  PKG_CHECK_MODULES(LIBXML2, libxml-2.0 > 2.6.17, HAVE_LIBXML2=yes, HAVE_LIBXML2=yes)
+   # Built-in libxml2 on OS X 10.8 lacks libxml-2.0.pc.
+   if test "${HAVE_LIBXML2}" != "yes" -a "$opsys" = "darwin"; then
+     SAVE_CPPFLAGS="$CPPFLAGS"
 
 === modified file 'lib-src/ntlib.c' (properties changed: -x to +x)
 --- old/lib-src/ntlib.c	2013-03-31 14:04:49 +0000
