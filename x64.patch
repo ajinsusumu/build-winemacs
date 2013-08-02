@@ -29,40 +29,33 @@
  ## gnu-linux might need -D_BSD_SOURCE on old libc5 systems.
  ## It is redundant in glibc2, since we define _GNU_SOURCE.
  AC_SUBST(C_SWITCH_SYSTEM)
-@@ -3138,7 +3150,7 @@
- HAVE_LIBXML2=no
- if test "${with_xml2}" != "no"; then
-   ### I'm not sure what the version number should be, so I just guessed.
--  PKG_CHECK_MODULES(LIBXML2, libxml-2.0 > 2.6.17, HAVE_LIBXML2=yes, HAVE_LIBXML2=no)
-+  PKG_CHECK_MODULES(LIBXML2, libxml-2.0 > 2.6.17, HAVE_LIBXML2=yes, HAVE_LIBXML2=yes)
-   # Built-in libxml2 on OS X 10.8 lacks libxml-2.0.pc.
-   if test "${HAVE_LIBXML2}" != "yes" -a "$opsys" = "darwin"; then
-     SAVE_CPPFLAGS="$CPPFLAGS"
-
-=== modified file 'lib-src/ntlib.c' (properties changed: -x to +x)
---- old/lib-src/ntlib.c	2013-03-31 14:04:49 +0000
-+++ new/lib-src/ntlib.c	2013-08-01 02:57:51 +0000
-@@ -224,7 +224,7 @@
- /* This is needed because lib/gettime.c calls gettimeofday, which MSVC
-    doesn't have.  Copied from w32.c.  */
- void
--gettimeofday (struct timeval *tv, struct timezone *tz)
-+gettimeofdaygg (struct timeval *tv, struct timezone *tz)
- {
-   struct _timeb tb;
-   _ftime (&tb);
+@@ -3152,6 +3164,11 @@
+       LIBXML2_CFLAGS="-I/usr/include/libxml2"
+     fi
+   fi
++  if test "${HAVE_LIBXML2}" != "yes" -a "$opsys" = "mingw32"; then
++  AC_CHECK_HEADER(libxml/HTMLparser.h,
++  [AC_CHECK_DECL(HTML_PARSE_RECOVER, HAVE_LIBXML2=yes, ,
++  [#include <libxml/HTMLparser.h>])])
++  fi
+   if test "${HAVE_LIBXML2}" = "yes"; then
+     if test "${opsys}" != "mingw32"; then
+       LIBS="$LIBXML2_LIBS $LIBS"
 
 === modified file 'nt/inc/sys/time.h' (properties changed: -x to +x)
 --- old/nt/inc/sys/time.h	2013-06-03 17:15:44 +0000
-+++ new/nt/inc/sys/time.h	2013-08-01 02:57:51 +0000
-@@ -14,8 +14,8 @@
++++ new/nt/inc/sys/time.h	2013-08-02 05:41:55 +0000
+@@ -14,8 +14,13 @@
  #define _TIMEVAL_DEFINED
  struct timeval
  {
--  long		tv_sec;		/* seconds */
--  long		tv_usec;	/* microseconds */
++#ifndef _WIN64
+   long		tv_sec;		/* seconds */
+   long		tv_usec;	/* microseconds */
++#else
 +  unsigned long long	tv_sec;		/* seconds */
 +  long int long		tv_usec;	/* microseconds */
++#endif
  };
  #define timerisset(tvp)  ((tvp)->tv_sec || (tvp)->tv_usec)
  #define timercmp(tvp, uvp, cmp) \
