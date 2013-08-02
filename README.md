@@ -37,3 +37,4 @@
 1. enable libxml2 in strawberry perl.
 1. fix the dll filenames in elisp files.
 1. enable pkg-config
+1. include png/jpeg/gif/xpm/xml library build script in one place.
