@@ -1,6 +1,27 @@
-=== modified file 'configure.ac' (properties changed: -x to +x)
---- old/configure.ac	2013-07-27 01:18:21 +0000
-+++ new/configure.ac	2013-08-01 03:30:35 +0000
+=== modified file 'Makefile.in'
+--- old/Makefile.in	2013-07-23 22:55:38 +0000
++++ new/Makefile.in	2013-08-06 07:30:52 +0000
+@@ -318,7 +318,7 @@
+ 
+ # Convert MSYS-style /x/foo or Windows-style x:\foo file names
+ # into x:/foo that Windows can grok.
+-msys_to_w32=sed -e 's,\\\\,/,g' -e 's,^/\([A-Za-z]\)/,\1:/,'
++msys_to_w32=sed -e 's,\\\\,/,g' -e 's,^/cygdrive/\([A-Za-z]\)/,\1:/,' -e 's,^/\([A-Za-z]\)/,\1:/,'
+ 
+ # Transform directory search path and its components.  Original can
+ # be MSYS or Windows style.  Set path separator to ";", directory
+@@ -326,6 +326,7 @@
+ # Remove empty path components and escape semicolons.
+ msys_lisppath_to_w32=sed -e 's,\\\\,/,g' 			\
+ 	-e 's,\(^\|[:;]\)\([A-Za-z]\):/,\1/\2/,g'		\
++	-e 's/:/;/g' -e 's,\(^\|;\)/cygdrive/\([A-Za-z]\)/,\1\2:/,g'	\
+ 	-e 's/:/;/g' -e 's,\(^\|;\)/\([A-Za-z]\)/,\1\2:/,g'	\
+ 	-e 's/;\+/;/g' -e 's/^;//' -e 's/;$$//' -e 's/;/\\\\;/g'
+ 
+
+=== modified file 'configure.ac'
+--- old/configure.ac	2013-08-04 16:56:56 +0000
++++ new/configure.ac	2013-08-06 07:26:00 +0000
 @@ -594,6 +594,18 @@
      esac
    ;;
@@ -42,7 +63,27 @@
      if test "${opsys}" != "mingw32"; then
        LIBS="$LIBXML2_LIBS $LIBS"
 
-=== modified file 'nt/inc/sys/time.h' (properties changed: -x to +x)
+=== modified file 'lib-src/Makefile.in'
+--- old/lib-src/Makefile.in	2013-07-23 22:55:38 +0000
++++ new/lib-src/Makefile.in	2013-08-06 06:35:48 +0000
+@@ -302,13 +302,14 @@
+ TAGS: etags${EXEEXT}
+ 	etags *.[ch]
+ 
++msys_to_w32=sed -e 's,\\\\,/,g' -e 's,^/cygdrive/\([A-Za-z]\)/,\1:/,' -e 's,^/\([A-Za-z]\)/,\1:/,'
+ ## This verifies that the non-ASCII characters in the file \`testfile\'
+ ## have not been clobbered by whatever means were used to copy and
+ ## distribute Emacs.  If they were clobbered, all the .elc files were
+ ## clobbered too.
+ test-distrib${EXEEXT}: ${srcdir}/test-distrib.c
+ 	$(CC) ${ALL_CFLAGS} -o test-distrib${EXEEXT} ${srcdir}/test-distrib.c
+-	./test-distrib ${srcdir}/testfile
++	./test-distrib `echo ${srcdir}/testfile | ${msys_to_w32}`
+ 
+ ../lib/libgnu.a: $(config_h)
+ 	cd ../lib && $(MAKE) libgnu.a
+
+=== modified file 'nt/inc/sys/time.h'
 --- old/nt/inc/sys/time.h	2013-06-03 17:15:44 +0000
 +++ new/nt/inc/sys/time.h	2013-08-02 05:41:55 +0000
 @@ -14,8 +14,13 @@
@@ -60,9 +101,41 @@
  #define timerisset(tvp)  ((tvp)->tv_sec || (tvp)->tv_usec)
  #define timercmp(tvp, uvp, cmp) \
 
-=== modified file 'src/image.c' (properties changed: -x to +x)
---- old/src/image.c	2013-07-20 19:20:33 +0000
-+++ new/src/image.c	2013-08-01 02:57:51 +0000
+=== modified file 'src/Makefile.in'
+--- old/src/Makefile.in	2013-07-23 23:00:43 +0000
++++ new/src/Makefile.in	2013-08-06 06:42:47 +0000
+@@ -454,6 +454,7 @@
+ 	  ln emacs$(EXEEXT) bootstrap-emacs$(EXEEXT); \
+ 	fi
+ 
++msys_to_w32=sed -e 's,\\\\,/,g' -e 's,^/cygdrive/\([A-Za-z]\)/,\1:/,' -e 's,^/\([A-Za-z]\)/,\1:/,'
+ ## We run make-docfile twice because the command line may get too long
+ ## on some systems.  The sed command operating on lisp.mk also reduces
+ ## the length of the command line.  Unfortunately, no-one has any idea
+@@ -471,8 +472,8 @@
+ $(etc)/DOC: $(libsrc)/make-docfile$(EXEEXT) $(obj) $(lisp)
+ 	$(MKDIR_P) $(etc)
+ 	-rm -f $(etc)/DOC
+-	$(libsrc)/make-docfile -d $(srcdir) $(SOME_MACHINE_OBJECTS) $(obj) > $(etc)/DOC
+-	$(libsrc)/make-docfile -a $(etc)/DOC -d $(lispsource) `sed -n -e 's| \\\\||' -e 's|^[ 	]*$$(lispsource)/||p' $(srcdir)/lisp.mk`
++	$(libsrc)/make-docfile -d `echo $(srcdir)|${msys_to_w32}` $(SOME_MACHINE_OBJECTS) $(obj) > $(etc)/DOC
++	$(libsrc)/make-docfile -a $(etc)/DOC -d `echo $(lispsource)|${msys_to_w32}` `sed -n -e 's| \\\\||' -e 's|^[ 	]*$$(lispsource)/||p' $(srcdir)/lisp.mk`
+ 
+ $(libsrc)/make-docfile$(EXEEXT):
+ 	cd $(libsrc); $(MAKE) $(MFLAGS) make-docfile$(EXEEXT)
+@@ -489,7 +490,7 @@
+ GLOBAL_SOURCES = $(base_obj:.o=.c) $(NS_OBJC_OBJ:.o=.m)
+ 
+ gl-stamp: $(libsrc)/make-docfile$(EXEEXT) $(GLOBAL_SOURCES)
+-	$(libsrc)/make-docfile -d $(srcdir) -g $(obj) > gl.tmp
++	$(libsrc)/make-docfile -d `echo $(srcdir) | ${msys_to_w32}` -g $(obj) > gl.tmp
+ 	$(srcdir)/../build-aux/move-if-change gl.tmp globals.h
+ 	echo timestamp > $@
+ 
+
+=== modified file 'src/image.c'
+--- old/src/image.c	2013-08-03 03:29:03 +0000
++++ new/src/image.c	2013-08-05 22:06:24 +0000
 @@ -5599,7 +5599,7 @@
     substitute may munge the signal mask, but that should be OK here.
     MinGW (MS-Windows) uses _setjmp and defines setjmp to _setjmp in
@@ -82,7 +155,7 @@
      error:
        if (c->png_ptr)
 
-=== modified file 'src/w32heap.c' (properties changed: -x to +x)
+=== modified file 'src/w32heap.c'
 --- old/src/w32heap.c	2013-01-22 13:30:17 +0000
 +++ new/src/w32heap.c	2013-08-01 02:57:51 +0000
 @@ -96,7 +96,7 @@
@@ -95,7 +168,7 @@
    /* We used to start with 2GB here, but on Windows 7 that would leave
       too little room in the address space for threads started by
 
-=== modified file 'src/w32proc.c' (properties changed: -x to +x)
+=== modified file 'src/w32proc.c'
 --- old/src/w32proc.c	2013-02-25 17:36:03 +0000
 +++ new/src/w32proc.c	2013-08-01 02:57:51 +0000
 @@ -2251,7 +2251,7 @@
