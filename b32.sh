@@ -7,4 +7,4 @@ mkdir ${BUILD}/bx32
 cd ${BUILD}/bx32
 CPPFLAGS='-DGLYPH_DEBUG=1' CFLAGS='-O0 -g3' ${SRC}/nt/msysconfig.sh --enable-checking >> ${BUILD}/$logfilename 2>&1
 make >> ${BUILD}/$logfilename 2>&1
-make -k check >> ${BUILD}/$logfilename 2>&1
+make check >> ${BUILD}/$logfilename 2>&1

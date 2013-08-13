@@ -1,6 +1,6 @@
 === modified file 'Makefile.in'
 --- old/Makefile.in	2013-07-23 22:55:38 +0000
-+++ new/Makefile.in	2013-08-06 07:30:52 +0000
++++ new/Makefile.in	2013-08-07 22:03:11 +0000
 @@ -318,7 +318,7 @@
  
  # Convert MSYS-style /x/foo or Windows-style x:\foo file names
@@ -21,7 +21,7 @@
 
 === modified file 'configure.ac'
 --- old/configure.ac	2013-08-04 16:56:56 +0000
-+++ new/configure.ac	2013-08-06 07:26:00 +0000
++++ new/configure.ac	2013-08-07 22:03:11 +0000
 @@ -594,6 +594,18 @@
      esac
    ;;
@@ -65,7 +65,7 @@
 
 === modified file 'lib-src/Makefile.in'
 --- old/lib-src/Makefile.in	2013-07-23 22:55:38 +0000
-+++ new/lib-src/Makefile.in	2013-08-06 06:35:48 +0000
++++ new/lib-src/Makefile.in	2013-08-07 22:03:11 +0000
 @@ -302,13 +302,14 @@
  TAGS: etags${EXEEXT}
  	etags *.[ch]
@@ -85,7 +85,7 @@
 
 === modified file 'nt/inc/sys/time.h'
 --- old/nt/inc/sys/time.h	2013-06-03 17:15:44 +0000
-+++ new/nt/inc/sys/time.h	2013-08-02 05:41:55 +0000
++++ new/nt/inc/sys/time.h	2013-08-07 22:03:11 +0000
 @@ -14,8 +14,13 @@
  #define _TIMEVAL_DEFINED
  struct timeval
@@ -103,7 +103,7 @@
 
 === modified file 'src/Makefile.in'
 --- old/src/Makefile.in	2013-07-23 23:00:43 +0000
-+++ new/src/Makefile.in	2013-08-06 06:42:47 +0000
++++ new/src/Makefile.in	2013-08-07 22:03:11 +0000
 @@ -454,6 +454,7 @@
  	  ln emacs$(EXEEXT) bootstrap-emacs$(EXEEXT); \
  	fi
@@ -135,7 +135,7 @@
 
 === modified file 'src/image.c'
 --- old/src/image.c	2013-08-03 03:29:03 +0000
-+++ new/src/image.c	2013-08-05 22:06:24 +0000
++++ new/src/image.c	2013-08-07 22:03:11 +0000
 @@ -5599,7 +5599,7 @@
     substitute may munge the signal mask, but that should be OK here.
     MinGW (MS-Windows) uses _setjmp and defines setjmp to _setjmp in
@@ -157,7 +157,7 @@
 
 === modified file 'src/w32heap.c'
 --- old/src/w32heap.c	2013-01-22 13:30:17 +0000
-+++ new/src/w32heap.c	2013-08-01 02:57:51 +0000
++++ new/src/w32heap.c	2013-08-07 22:03:11 +0000
 @@ -96,7 +96,7 @@
  allocate_heap (void)
  {
@@ -170,7 +170,7 @@
 
 === modified file 'src/w32proc.c'
 --- old/src/w32proc.c	2013-02-25 17:36:03 +0000
-+++ new/src/w32proc.c	2013-08-01 02:57:51 +0000
++++ new/src/w32proc.c	2013-08-07 22:03:11 +0000
 @@ -2251,7 +2251,7 @@
  
  /* Emulate 'kill', but only for other processes.  */

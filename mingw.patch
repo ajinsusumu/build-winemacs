@@ -1,0 +1,186 @@
+=== modified file 'leim/Makefile.in'
+--- old/leim/Makefile.in	2013-07-23 22:55:38 +0000
++++ new/leim/Makefile.in	2013-08-08 02:03:50 +0000
+@@ -26,17 +26,21 @@
+ # inherited from the environment.
+ SHELL = /bin/sh
+ 
++msys_to_w32=sed -e 's,\\\\,/,g' -e 's,^/cygdrive/\([A-Za-z]\)/,\1:/,' -e 's,^/\([A-Za-z]\)/,\1:/,'
++
+ # Here are the things that we expect ../configure to edit.
+ srcdir=@srcdir@
++winsrcdir:=$(shell echo ${srcdir}|${msys_to_w32})
+ 
+ # Which Emacs to use to convert TIT files to Emacs Lisp files,
+ # byte-compile Emacs Lisp files, and generate the file leim-list.el.
+ EMACS = ../src/emacs
+ 
+ buildlisppath=${srcdir}/../lisp
++winbuildlisppath:=$(shell echo ${buildlisppath}|${msys_to_w32})
+ 
+ # How to run Emacs.
+-RUN_EMACS = EMACSLOADPATH=$(buildlisppath) LC_ALL=C \
++RUN_EMACS = EMACSLOADPATH=$(winbuildlisppath) LC_ALL=C \
+ 	${EMACS} -batch --no-site-file --no-site-lisp
+ 
+ MKDIR_P = @MKDIR_P@
+@@ -79,7 +83,7 @@
+ 
+ .el.elc:
+ 	@echo Compiling $<
+-	@${RUN_EMACS} -l ${buildlisppath}/international/quail -f batch-byte-compile $<
++	@${RUN_EMACS} -l ${winbuildlisppath}/international/quail -f batch-byte-compile `echo $< | ${msys_to_w32}`
+ 
+ all: leim-list.el compile-main
+ .PHONY: all
+@@ -112,8 +116,8 @@
+ ## It doesn't seem possible to do this with VPATH and suffix rules.
+ changed.tit: ${TIT_SOURCES}
+ 	@${MKDIR_P} quail
+-	${RUN_EMACS} -l ${buildlisppath}/international/titdic-cnv \
+-	  -f batch-titdic-convert -dir quail ${srcdir}/CXTERM-DIC; \
++	${RUN_EMACS} -l ${winbuildlisppath}/international/titdic-cnv \
++	  -f batch-titdic-convert -dir quail ${winsrcdir}/CXTERM-DIC; \
+ 	  echo "changed" > $@
+ 
+ MISC_SOURCES= \
+@@ -129,18 +133,18 @@
+ 
+ changed.misc: ${MISC_SOURCES}
+ 	@${MKDIR_P} quail
+-	${RUN_EMACS} -l ${buildlisppath}/international/titdic-cnv \
+-	  -f batch-miscdic-convert -dir quail ${srcdir}/MISC-DIC; \
++	${RUN_EMACS} -l ${winbuildlisppath}/international/titdic-cnv \
++	  -f batch-miscdic-convert -dir quail ${winsrcdir}/MISC-DIC; \
+ 	  echo "changed" > $@
+ 
+ leim-list.el: ${TIT_MISC} ${srcdir}/leim-ext.el
+ 	rm -f leim-list.el
+ 	if [ x`cd ${srcdir} && /bin/pwd` = x`/bin/pwd` ] ; then \
+-	  ${RUN_EMACS} -l ${buildlisppath}/international/quail \
++	  ${RUN_EMACS} -l ${winbuildlisppath}/international/quail \
+ 	    --eval "(update-leim-list-file \".\")" ; \
+ 	else \
+-	  ${RUN_EMACS} -l ${buildlisppath}/international/quail \
+-	    --eval "(update-leim-list-file \".\" (unmsys--file-name \"${srcdir}\"))" ; \
++	  ${RUN_EMACS} -l ${winbuildlisppath}/international/quail \
++	    --eval "(update-leim-list-file \".\" (unmsys--file-name \"${winsrcdir}\"))" ; \
+ 	fi
+ 	sed -n '/^[^;]/ p' < ${srcdir}/leim-ext.el >> $@
+ 
+@@ -199,4 +203,4 @@
+ 
+ check-declare:
+ 	$(RUN_EMACS) -l $(buildlisppath)/emacs-lisp/check-declare \
+-	  --eval '(check-declare-directory (unmsys--file-name "$(srcdir)"))'
++	  --eval '(check-declare-directory (unmsys--file-name "$(winsrcdir)"))'
+
+=== modified file 'lisp/Makefile.in'
+--- old/lisp/Makefile.in	2013-07-23 22:55:38 +0000
++++ new/lisp/Makefile.in	2013-08-08 02:05:21 +0000
+@@ -19,10 +19,15 @@
+ 
+ SHELL = /bin/sh
+ 
++msys_to_w32=sed -e 's,\\\\,/,g' -e 's,^/cygdrive/\([A-Za-z]\)/,\1:/,' -e 's,^/\([A-Za-z]\)/,\1:/,'
++
+ srcdir = @srcdir@
+ top_srcdir = @top_srcdir@
+ abs_top_builddir = @abs_top_builddir@
+ lisp = $(srcdir)
++
++winlisp:=$(shell echo ${lisp}|${msys_to_w32})
++
+ VPATH = $(srcdir)
+ 
+ # Empty for all systems except MinGW, where xargs needs an explicit
+@@ -112,7 +117,7 @@
+ 
+ # The actual Emacs command run in the targets below.
+ 
+-emacs = EMACSLOADPATH=$(lisp) LC_ALL=C $(EMACS) $(EMACSOPT)
++emacs = EMACSLOADPATH=$(winlisp) LC_ALL=C $(EMACS) $(EMACSOPT)
+ 
+ # Common command to find subdirectories
+ setwins=subdirs=`find . -type d -print`; \
+@@ -181,7 +186,7 @@
+ 	echo Directories: $$wins; \
+ 	$(emacs) -l autoload \
+ 	    --eval '(setq autoload-builtin-package-versions t)' \
+-	    --eval '(setq generated-autoload-file (unmsys--file-name "$(lisp)/loaddefs.el"))' \
++	    --eval '(setq generated-autoload-file (unmsys--file-name "$(winlisp)/loaddefs.el"))' \
+ 	    -f batch-update-autoloads $$wins
+ 
+ # This is required by the bootstrap-emacs target in ../src/Makefile, so
+@@ -235,7 +240,7 @@
+ 	@# the most common bootstrapping problems.
+ 	@$(emacs) $(BYTE_COMPILE_FLAGS) \
+ 		-l bytecomp -f byte-compile-refresh-preloaded \
+-		-f batch-byte-compile $(THEFILE)
++		-f batch-byte-compile `echo $(THEFILE) | ${msys_to_w32}`
+ 
+ # Files MUST be compiled one by one. If we compile several files in a
+ # row (i.e., in the same instance of Emacs) we can't make sure that
+@@ -254,7 +259,7 @@
+ 	@# files, which is normally done in compile-first, but may also be
+ 	@# recompiled via this rule.
+ 	@$(emacs) $(BYTE_COMPILE_FLAGS) \
+-		-f batch-byte-compile $<
++		-f batch-byte-compile `echo $< | ${msys_to_w32}`
+ 
+ .PHONY: compile-first compile-main compile compile-always
+ 
+
+=== modified file 'test/automated/Makefile.in'
+--- old/test/automated/Makefile.in	2013-07-23 22:55:38 +0000
++++ new/test/automated/Makefile.in	2013-08-08 02:46:04 +0000
+@@ -19,12 +19,23 @@
+ 
+ SHELL = /bin/sh
+ 
++msys_to_w32=sed -e 's,\\\\,/,g' -e 's,^/cygdrive/\([A-Za-z]\)/,\1:/,' -e 's,^/\([A-Za-z]\)/,\1:/,'
++
+ srcdir = @srcdir@
++
++winsrcdir:=$(shell echo ${srcdir}|${msys_to_w32})
++
+ top_srcdir = @top_srcdir@
+ abs_top_builddir = @abs_top_builddir@
+ test = $(srcdir)
++
++wintest = `echo $(test) | ${msys_to_w32}`
++
+ VPATH = $(srcdir)
+ lispsrc = $(top_srcdir)/lisp
++
++winlispsrc:=$(shell echo ${lispsrc}|${msys_to_w32})
++
+ lisp = ${abs_top_builddir}/lisp
+ 
+ # You can specify a different executable on the make command line,
+@@ -47,6 +58,7 @@
+ 
+ # The actual Emacs command run in the targets below.
+ emacs = EMACSLOADPATH=$(lispsrc):$(test) LC_ALL=C $(EMACS) $(EMACSOPT)
++winemacs = EMACSLOADPATH="$(winlispsrc);$(wintest)" LC_ALL=C $(EMACS) $(EMACSOPT)
+ 
+ # Common command to find subdirectories
+ setwins=subdirs=`find . -type d -print`; \
+@@ -74,7 +86,7 @@
+ # cannot have prerequisites.
+ .el.elc:
+ 	@echo Compiling $<
+-	@$(emacs) $(BYTE_COMPILE_EXTRA_FLAGS) -f batch-byte-compile $<
++	@$(winemacs) $(BYTE_COMPILE_EXTRA_FLAGS) -f batch-byte-compile `echo $< | ${msys_to_w32}`
+ 
+ .PHONY: lisp-compile compile-main compile compile-always
+ 
+@@ -154,6 +166,6 @@
+ 	  els="$$els $$el"; \
+ 	done; \
+ 	echo Testing $$els; \
+-	$(emacs) $$args -f ert-run-tests-batch-and-exit)
++	$(winemacs) $$args -f ert-run-tests-batch-and-exit)
+ 
+ # Makefile ends here.
+
